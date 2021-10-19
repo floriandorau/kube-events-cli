@@ -4,13 +4,26 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node ./bin/cli.js",
+    "start:dev": "nodemon"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^14.17.20",
+    "@types/yargs": "^17.0.3",
+    "nodemon": "^2.0.13",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
+  },
   "dependencies": {
-    "@kubernetes/client-node": "^0.12.2",
-    "yargs": "^16.0.3"
+    "@kubernetes/client-node": "^0.15.1",
+    "@slack/web-api": "^6.4.0",
+    "@slack/webhook": "^6.0.0",
+    "dayjs": "^1.10.7",
+    "dotenv": "^10.0.0",
+    "yargs": "^17.2.1"
   }
 }
