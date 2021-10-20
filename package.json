@@ -2,9 +2,9 @@
   "name": "kube-events-cli",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
     "build": "tsc",
     "start": "node ./bin/cli.js",
     "start:dev": "nodemon"
@@ -14,14 +14,15 @@
   "devDependencies": {
     "@types/node": "^14.17.20",
     "@types/yargs": "^17.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.1.0",
+    "@typescript-eslint/parser": "^5.1.0",
+    "eslint": "^8.0.1",
     "nodemon": "^2.0.13",
-    "ts-node": "^10.2.1",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.4"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.15.1",
     "@slack/web-api": "^6.4.0",
-    "@slack/webhook": "^6.0.0",
     "dayjs": "^1.10.7",
     "dotenv": "^10.0.0",
     "yargs": "^17.2.1"

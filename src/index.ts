@@ -1,52 +1,52 @@
-import { CoreV1Event, CoreV1EventList } from "@kubernetes/client-node";
-import { setInterval } from "timers";
-import * as k8s from "./k8s";
-import { enqueMessage, sendQueuedMessages } from "./slack";
-import { Event, Kind, Reason } from "./model/Event";
+import { CoreV1Event, CoreV1EventList } from '@kubernetes/client-node';
+import * as k8s from './k8s';
+import { enqueMessage, sendQueuedMessages } from './slack';
+import { Event, Kind, Reason } from './model/Event';
 
 const flatten = (event: CoreV1Event): Event => {
-  return {
-    name: event.involvedObject.name,
-    kind: event.involvedObject.kind
-      ? Kind[event.involvedObject.kind as keyof typeof Kind]
-      : undefined,
-    namespace: event.involvedObject.namespace,
-    fieldPath: event.involvedObject.fieldPath,
-    reason: event.reason
-      ? Reason[event.reason as keyof typeof Reason]
-      : undefined,
-    message: event.message,
-    type: event.type,
-    firstTimestamp: event.firstTimestamp,
-    lastTimestamp: event.lastTimestamp,
-  };
+    return {
+        name: event.involvedObject.name,
+        kind: event.involvedObject.kind
+            ? Kind[event.involvedObject.kind as keyof typeof Kind]
+            : undefined,
+        namespace: event.involvedObject.namespace,
+        fieldPath: event.involvedObject.fieldPath,
+        reason: event.reason
+            ? Reason[event.reason as keyof typeof Reason]
+            : undefined,
+        message: event.message,
+        type: event.type,
+        firstTimestamp: event.firstTimestamp,
+        lastTimestamp: event.lastTimestamp,
+    };
 };
 
 const print = (events: CoreV1EventList) => {
-  events.items
-    .map((item) => flatten(item))
-    .filter((item) => item.kind && [Kind.Pod].includes(item.kind))
-    .filter(
-      (item) =>
-        item.reason && [Reason.Started, Reason.Failed].includes(item.reason)
-    )
-    .forEach((item) => enqueMessage(item));
+    events.items
+        .map((item) => flatten(item))
+        .filter((item) => item.kind && [Kind.Pod].includes(item.kind))
+        .filter(
+            (item) =>
+                item.reason &&
+                [Reason.Started, Reason.Failed].includes(item.reason)
+        )
+        .forEach((item) => enqueMessage(item));
 
-  sendQueuedMessages();
+    sendQueuedMessages();
 };
 
 export const fetchEvents = async () => {
-  let resourceVersion: string | undefined = undefined;
-  let events: CoreV1EventList = await k8s.fetchEvents(resourceVersion);
-  print(events);
+    const resourceVersion: string | undefined = undefined;
+    const events: CoreV1EventList = await k8s.fetchEvents(resourceVersion);
+    print(events);
 
-  //   const timeout = setInterval(async () => {
-  //     events = await k8s.fetchEvents(resourceVersion);
-  //     print(events);
-  //   }, 5000);
+    //   const timeout = setInterval(async () => {
+    //     events = await k8s.fetchEvents(resourceVersion);
+    //     print(events);
+    //   }, 5000);
 
-  //   setTimeout(() => {
-  //     console.log("clear timeout");
-  //     clearInterval(timeout);
-  //   }, 6000);
+    //   setTimeout(() => {
+    //     console.log("clear timeout");
+    //     clearInterval(timeout);
+    //   }, 6000);
 };

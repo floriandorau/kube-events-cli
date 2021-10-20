@@ -1,37 +1,37 @@
 export enum Kind {
-  Unknown = "Unknown",
-  Pod = "Pod",
-  Deployment = "Deployment",
-  ReplicaSet = "ReplicaSet",
+    Unknown = 'Unknown',
+    Pod = 'Pod',
+    Deployment = 'Deployment',
+    ReplicaSet = 'ReplicaSet',
 }
 
 export enum Reason {
-  // Pods
-  BackOff = "BackOff",
-  Created = "Created",
-  Failed = "Failed",
-  Pulling = "Pulling",
-  Pulled = "Pulled",
-  Killing = "Killing",
-  Scheduled = "Scheduled",
-  Started = "Started",
+    // Pods
+    BackOff = 'BackOff',
+    Created = 'Created',
+    Failed = 'Failed',
+    Pulling = 'Pulling',
+    Pulled = 'Pulled',
+    Killing = 'Killing',
+    Scheduled = 'Scheduled',
+    Started = 'Started',
 
-  // ReplicaSets
-  SuccessfulCreate = "SuccessfulCreate",
-  SuccessfulDelete = "SuccessfulDelete",
+    // ReplicaSets
+    SuccessfulCreate = 'SuccessfulCreate',
+    SuccessfulDelete = 'SuccessfulDelete',
 
-  // Deployment
-  ScalingReplicaSet = "ScalingReplicaSet",
+    // Deployment
+    ScalingReplicaSet = 'ScalingReplicaSet',
 }
 
 export interface Event {
-  name?: string;
-  kind?: Kind;
-  namespace?: string;
-  fieldPath?: string;
-  reason?: Reason;
-  message?: string;
-  type?: string;
-  firstTimestamp?: Date;
-  lastTimestamp?: Date;
+    name?: string;
+    kind?: Kind;
+    namespace?: string;
+    fieldPath?: string;
+    reason?: Reason;
+    message?: string;
+    type?: string;
+    firstTimestamp?: Date;
+    lastTimestamp?: Date;
 }
