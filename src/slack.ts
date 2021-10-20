@@ -36,7 +36,7 @@ const buildMessage = (queuedEvent: QueuedEvent) => {
                     : ''
             })  \n`
     )
-    console.log
+
     blocks.push(
         {
             type: 'section',
