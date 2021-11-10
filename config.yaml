@@ -1,1 +1,8 @@
-interval: 30000
+events:
+    interval: 10000
+slack:
+    enabled: true
+    defaultChannel: C02J715D9MF
+    events:
+        - namespace: traefik
+          channel: C02J715D9MF

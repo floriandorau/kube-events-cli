@@ -2,13 +2,7 @@ import { CoreV1Event, CoreV1EventList } from '@kubernetes/client-node'
 import * as k8s from './k8s'
 import { enqueMessage, sendQueuedMessages } from './slack'
 import { Event, Kind, Reason } from './model'
-import { readFileSync } from 'fs'
-import YAML from 'yaml'
-
-const readConfigFile = function (path: string) {
-    const file = readFileSync(path, 'utf8')
-    return YAML.parse(file)
-}
+import { readConfig } from './config'
 
 const flatten = (event: CoreV1Event): Event => {
     return {
@@ -37,9 +31,12 @@ const processEvents = (events: CoreV1EventList) => {
         .filter(
             (item) =>
                 item.reason &&
-                [Reason.Started, Reason.Failed, Reason.SystemOOM].includes(
-                    item.reason
-                )
+                [
+                    Reason.Started,
+                    Reason.Killing,
+                    Reason.Failed,
+                    Reason.SystemOOM,
+                ].includes(item.reason)
         )
         .forEach((item) => enqueMessage(item))
 
@@ -50,17 +47,13 @@ export type Options = {
     config: string
 }
 
-type Config = {
-    interval: number
-}
-
 export const fetchEvents = (options: Options) => {
-    const config: Config = readConfigFile(options.config)
+    const config = readConfig(options.config)
 
     const resourceVersion: string | undefined = undefined
 
     return new Promise((_, reject) => {
-        const interval = config.interval ?? 10000
+        const interval = config?.events?.interval
         console.log(`Run fetch events in interval of '${interval}ms'`)
 
         const timeout = setInterval(async () => {

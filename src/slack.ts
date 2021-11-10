@@ -4,9 +4,9 @@ import dayjs from 'dayjs'
 
 import * as cache from './cache'
 
-const token = process.env.SLACK_TOKEN
-const channel = process.env.SLACK_CHANNEL ?? ''
-const web = new WebClient(token)
+import { getConfig } from './config'
+
+const web = new WebClient(process.env.SLACK_TOKEN)
 
 const buildMessage = (queuedEvent: CachedEvent) => {
     const blocks: any[] = [
@@ -14,7 +14,7 @@ const buildMessage = (queuedEvent: CachedEvent) => {
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: `Events related to ${queuedEvent.kind} \`${queuedEvent.name}\` in namespace \`${queuedEvent.namespace}\`:`,
+                text: `Events related to \`${queuedEvent.name}\`:`,
             },
         },
     ]
@@ -41,7 +41,11 @@ const buildMessage = (queuedEvent: CachedEvent) => {
             elements: [
                 {
                     type: 'mrkdwn',
-                    text: `${dayjs().format('YYYY-MM-DD HH:mm:ss')}`,
+                    text: `${dayjs().format(
+                        'YYYY-MM-DD HH:mm:ss'
+                    )} | namespace: \`${queuedEvent.namespace}\` | kind: \`${
+                        queuedEvent.kind
+                    }\``,
                 },
             ],
         }
@@ -66,20 +70,18 @@ export const enqueMessage = (event: Event) => {
 }
 
 export const sendQueuedMessages = async () => {
+    const config = getConfig()
+
     if (cache.size() === 0) {
-        console.log('no message to send')
+        console.log('no messages to send')
     } else {
         cache.forEach(async (key, cachedEvent) => {
             if (cachedEvent.processed === false) {
+                const channel = config.slack.defaultChannel
                 const message = buildMessage(cachedEvent) ?? ''
-
-                console.log(`Send message: [${message}]`)
-
-                console.log(JSON.stringify(message))
                 const result = await web.chat.postMessage({
                     blocks: message,
-                    //mrkdwn: true,
-                    channel: channel,
+                    channel,
                 })
 
                 console.log(
