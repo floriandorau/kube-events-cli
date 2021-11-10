@@ -2,6 +2,13 @@ import { CoreV1Event, CoreV1EventList } from '@kubernetes/client-node'
 import * as k8s from './k8s'
 import { enqueMessage, sendQueuedMessages } from './slack'
 import { Event, Kind, Reason } from './model'
+import { readFileSync } from 'fs'
+import YAML from 'yaml'
+
+const readConfigFile = function (path: string) {
+    const file = readFileSync(path, 'utf8')
+    return YAML.parse(file)
+}
 
 const flatten = (event: CoreV1Event): Event => {
     return {
@@ -21,7 +28,7 @@ const flatten = (event: CoreV1Event): Event => {
     }
 }
 
-const print = (events: CoreV1EventList) => {
+const processEvents = (events: CoreV1EventList) => {
     events.items
         .map((item) => flatten(item))
         .filter(
@@ -39,18 +46,33 @@ const print = (events: CoreV1EventList) => {
     sendQueuedMessages()
 }
 
-export const fetchEvents = async () => {
+export type Options = {
+    config: string
+}
+
+type Config = {
+    interval: number
+}
+
+export const fetchEvents = (options: Options) => {
+    const config: Config = readConfigFile(options.config)
+
     const resourceVersion: string | undefined = undefined
-    const events: CoreV1EventList = await k8s.fetchEvents(resourceVersion)
-    print(events)
 
-    //   const timeout = setInterval(async () => {
-    //     events = await k8s.fetchEvents(resourceVersion);
-    //     print(events);
-    //   }, 5000);
+    return new Promise((_, reject) => {
+        const interval = config.interval ?? 10000
+        console.log(`Run fetch events in interval of '${interval}ms'`)
 
-    //   setTimeout(() => {
-    //     console.log("clear timeout");
-    //     clearInterval(timeout);
-    //   }, 6000);
+        const timeout = setInterval(async () => {
+            k8s.fetchEvents(resourceVersion)
+                .then(processEvents)
+                .catch((err) => {
+                    console.error(
+                        'Erro while fetching events. Clearing interval timeout'
+                    )
+                    clearInterval(timeout)
+                    reject(err)
+                })
+        }, interval)
+    })
 }

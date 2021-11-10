@@ -3,10 +3,13 @@ import NodeCache from 'node-cache'
 import { CachedEvent } from './model'
 
 const cache = new NodeCache({
-    stdTTL: 24 * 60 * 60, // seconds
-    checkperiod: 120, // seconds
+    stdTTL: 2 * 60 * 60, // seconds
+    checkperiod: 600, // seconds
     deleteOnExpire: true,
 })
+
+cache.on('expired', (key) => console.log(`Cached event ${key} expired`))
+cache.on('del', (key) => console.log(`Cached event ${key} deleted`))
 
 export const set = (key: string, val: CachedEvent) => cache.set(key, val)
 export const get = (key: string): CachedEvent | undefined => cache.get(key)

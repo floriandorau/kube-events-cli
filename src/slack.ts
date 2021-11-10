@@ -51,8 +51,6 @@ const buildMessage = (queuedEvent: CachedEvent) => {
 }
 
 export const enqueMessage = (event: Event) => {
-    console.debug('Eneque message', event)
-
     const cachedEvent =
         cache.get(event.name!) ??
         ({
@@ -93,6 +91,8 @@ export const sendQueuedMessages = async () => {
                     processed: true,
                     ts: result.ts,
                 })
+            } else {
+                console.log(`${cachedEvent.name} already processed`)
             }
         })
     }
