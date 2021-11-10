@@ -1,6 +1,7 @@
 export enum Kind {
     Unknown = 'Unknown',
     Pod = 'Pod',
+    Node = 'Node',
     Deployment = 'Deployment',
     ReplicaSet = 'ReplicaSet',
 }
@@ -22,6 +23,9 @@ export enum Reason {
 
     // Deployment
     ScalingReplicaSet = 'ScalingReplicaSet',
+
+    // Node
+    SystemOOM = 'SystemOOM',
 }
 
 export interface Event {
@@ -39,7 +43,7 @@ export interface Event {
 export type CachedEvent = {
     name: string
     kind: Kind
-    namespace: string
+    namespace?: string
     events: Event[]
     processed: boolean
     ts?: string

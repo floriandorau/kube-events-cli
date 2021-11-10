@@ -1,7 +1,7 @@
 import { CoreV1Event, CoreV1EventList } from '@kubernetes/client-node'
 import * as k8s from './k8s'
 import { enqueMessage, sendQueuedMessages } from './slack'
-import { Event, Kind, Reason } from './model/Event'
+import { Event, Kind, Reason } from './model'
 
 const flatten = (event: CoreV1Event): Event => {
     return {

@@ -1,23 +1,14 @@
 import { WebClient } from '@slack/web-api'
-import { Event, Kind } from './model/Event'
+import { Event, Kind, CachedEvent } from './model'
 import dayjs from 'dayjs'
+
+import * as cache from './cache'
 
 const token = process.env.SLACK_TOKEN
 const channel = process.env.SLACK_CHANNEL ?? ''
 const web = new WebClient(token)
 
-type QueuedEvent = {
-    name: string
-    kind: Kind
-    namespace: string
-    events: Event[]
-    processed: boolean
-    ts?: string
-}
-
-const cache = new Map<string, QueuedEvent>()
-
-const buildMessage = (queuedEvent: QueuedEvent) => {
+const buildMessage = (queuedEvent: CachedEvent) => {
     const blocks: any[] = [
         {
             type: 'section',
@@ -62,25 +53,27 @@ const buildMessage = (queuedEvent: QueuedEvent) => {
 export const enqueMessage = (event: Event) => {
     console.debug('Eneque message', event)
 
-    const queuedEvent: QueuedEvent = cache.get(event.name!) ?? {
-        name: event.name ?? '',
-        kind: event.kind ?? Kind.Unknown,
-        namespace: event.namespace ?? '',
-        events: [],
-        processed: false,
-    }
+    const cachedEvent =
+        cache.get(event.name!) ??
+        ({
+            name: event.name ?? '',
+            kind: event.kind ?? Kind.Unknown,
+            namespace: event.namespace,
+            events: [],
+            processed: false,
+        } as CachedEvent)
 
-    queuedEvent.events.push(event)
-    cache.set(event.name!, queuedEvent)
+    cachedEvent.events.push(event)
+    cache.set(event.name!, cachedEvent)
 }
 
 export const sendQueuedMessages = async () => {
-    if (cache.size === 0) {
+    if (cache.size() === 0) {
         console.log('no message to send')
     } else {
-        cache.forEach(async (queuedEvent, key) => {
-            if (queuedEvent.processed === false) {
-                const message = buildMessage(queuedEvent) ?? ''
+        cache.forEach(async (key, cachedEvent) => {
+            if (cachedEvent.processed === false) {
+                const message = buildMessage(cachedEvent) ?? ''
 
                 console.log(`Send message: [${message}]`)
 
@@ -96,7 +89,7 @@ export const sendQueuedMessages = async () => {
                 )
 
                 cache.set(key, {
-                    ...queuedEvent,
+                    ...cachedEvent,
                     processed: true,
                     ts: result.ts,
                 })
