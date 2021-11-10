@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 
-const yargs = require("yargs");
+const yargs = require('yargs');
 require('dotenv').config()
 
-const { fetchEvents } = require("../lib");
-const { run } = require("../lib/proxy");
+const { fetchEvents } = require('../lib');
+const { run } = require('../lib/proxy');
 
 yargs.command(
-    "events",
-    "Stream events",
+    'events',
+    'Stream events',
     () => { },
-    async function handler(argv) {
+    async function handler() {
         run()
-            .then(async (data) => await fetchEvents())
+            .then(async () => await fetchEvents())
             .catch((err) => console.error(err));
     }
 ).argv;
