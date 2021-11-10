@@ -1,7 +1,7 @@
-import { CoreV1Event, CoreV1EventList } from '@kubernetes/client-node';
-import * as k8s from './k8s';
-import { enqueMessage, sendQueuedMessages } from './slack';
-import { Event, Kind, Reason } from './model/Event';
+import { CoreV1Event, CoreV1EventList } from '@kubernetes/client-node'
+import * as k8s from './k8s'
+import { enqueMessage, sendQueuedMessages } from './slack'
+import { Event, Kind, Reason } from './model/Event'
 
 const flatten = (event: CoreV1Event): Event => {
     return {
@@ -18,27 +18,31 @@ const flatten = (event: CoreV1Event): Event => {
         type: event.type,
         firstTimestamp: event.firstTimestamp,
         lastTimestamp: event.lastTimestamp,
-    };
-};
+    }
+}
 
 const print = (events: CoreV1EventList) => {
     events.items
         .map((item) => flatten(item))
-        .filter((item) => item.kind && [Kind.Pod].includes(item.kind))
+        .filter(
+            (item) => item.kind && [Kind.Pod, Kind.Node].includes(item.kind)
+        )
         .filter(
             (item) =>
                 item.reason &&
-                [Reason.Started, Reason.Failed].includes(item.reason)
+                [Reason.Started, Reason.Failed, Reason.SystemOOM].includes(
+                    item.reason
+                )
         )
-        .forEach((item) => enqueMessage(item));
+        .forEach((item) => enqueMessage(item))
 
-    sendQueuedMessages();
-};
+    sendQueuedMessages()
+}
 
 export const fetchEvents = async () => {
-    const resourceVersion: string | undefined = undefined;
-    const events: CoreV1EventList = await k8s.fetchEvents(resourceVersion);
-    print(events);
+    const resourceVersion: string | undefined = undefined
+    const events: CoreV1EventList = await k8s.fetchEvents(resourceVersion)
+    print(events)
 
     //   const timeout = setInterval(async () => {
     //     events = await k8s.fetchEvents(resourceVersion);
@@ -49,4 +53,4 @@ export const fetchEvents = async () => {
     //     console.log("clear timeout");
     //     clearInterval(timeout);
     //   }, 6000);
-};
+}
