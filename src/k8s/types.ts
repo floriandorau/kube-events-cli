@@ -39,12 +39,3 @@ export interface Event {
     firstTimestamp?: Date
     lastTimestamp?: Date
 }
-
-export type CachedEvent = {
-    name: string
-    kind: Kind
-    namespace?: string
-    events: Event[]
-    processed: boolean
-    ts?: string
-}

@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 
-export const run = function () {
+export const run = () => {
     const kubectl = spawn('kubectl', ['proxy'], {
         cwd: undefined,
         env: process.env,

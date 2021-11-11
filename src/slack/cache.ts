@@ -1,6 +1,15 @@
 import NodeCache from 'node-cache'
 
-import { CachedEvent } from './model'
+import { Kind, Event } from '../k8s'
+
+export type CachedEvent = {
+    name: string
+    kind: Kind
+    namespace?: string
+    events: Event[]
+    processed: boolean
+    ts?: string
+}
 
 const cache = new NodeCache({
     stdTTL: 2 * 60 * 60, // seconds

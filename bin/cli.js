@@ -3,19 +3,9 @@
 const yargs = require('yargs');
 require('dotenv').config()
 
-const { fetchEvents } = require('../lib');
-const { run } = require('../lib/proxy');
+const { fetchK8sEvents } = require('../lib');
+const { run } = require('../lib/util/proxy');
 
-// require('yargs/yargs')(process.argv.slice(2))
-//     .version()
-//     .option('i', {
-//         alias: 'interval',
-//         describe: 'event fetch interval',
-//         type: 'string',
-//         nargs: 1,
-//         demand: false,
-//         default: '5000'
-//     })
 yargs
     .version()
     .usage('Usage: $0 -x [num]')
@@ -35,7 +25,7 @@ yargs
         },
         function handler(argv) {
             run()
-                .then(async () => await fetchEvents({ config: argv.config }))
+                .then(async () => await fetchK8sEvents({ config: argv.config }))
                 .catch((err) => console.error(err));
         })
     .epilog('copyright 2021')
