@@ -1,5 +1,6 @@
+stage: local
 events:
-    interval: 10000
+    interval: 30000
 slack:
     enabled: true
     defaultChannel: C02J715D9MF
