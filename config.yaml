@@ -1,6 +1,8 @@
 stage: local
-events:
-    interval: 30000
+fetchInterval: 30000
+k8sEvents:
+    namespaces:
+        - 'traefik'
 slack:
     enabled: true
     defaultChannel: C02J715D9MF

@@ -2,7 +2,7 @@ import { CoreV1Event, CoreV1EventList } from '@kubernetes/client-node'
 import * as k8s from './k8s'
 import { enqueMessage, sendQueuedMessages } from './slack'
 import { Event, Kind, Reason } from './model'
-import { readConfig } from './config'
+import { getConfig, readConfig } from './config'
 
 const flatten = (event: CoreV1Event): Event => {
     return {
@@ -23,8 +23,13 @@ const flatten = (event: CoreV1Event): Event => {
 }
 
 const processEvents = (events: CoreV1EventList) => {
+    const { k8sEvents } = getConfig()
     events.items
         .map((item) => flatten(item))
+        .filter(
+            (item) =>
+                item.namespace && k8sEvents.namespaces.includes(item.namespace)
+        )
         .filter(
             (item) => item.kind && [Kind.Pod, Kind.Node].includes(item.kind)
         )
@@ -53,7 +58,7 @@ export const fetchEvents = (options: Options) => {
     const resourceVersion: string | undefined = undefined
 
     return new Promise((_, reject) => {
-        const interval = config?.events?.interval
+        const interval = config?.fetchInterval
         console.log(`Run fetch events in interval of '${interval}ms'`)
 
         const timeout = setInterval(async () => {
