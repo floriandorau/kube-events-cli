@@ -1,8 +1,11 @@
 import { readFileSync } from 'fs'
 import YAML from 'yaml'
+import { Kind, Reason } from '../k8s'
 
 export type K8sEventsConfig = {
     namespaces: string[]
+    reasons: Reason[]
+    kinds: Kind[]
 }
 
 export type SlackConfig = {
@@ -17,6 +20,7 @@ export type Config = {
     stage: string
     debug?: boolean
     fetchInterval: number
+    processPastEvents: boolean
     k8sEvents: K8sEventsConfig
     slack: SlackConfig
 }
@@ -25,8 +29,11 @@ const defaultConfig = {
     stage: 'local',
     debug: process.env.SLACK_TOKEN?.toLowerCase() === 'true',
     fetchInterval: 10000,
+    processPastEvents: false,
     k8sEvents: {
         namespaces: [],
+        reasons: [],
+        kinds: [],
     },
     slack: {
         enabled: false,
@@ -42,7 +49,9 @@ const assignConfig = (config: object) => Object.assign(defaultConfig, config)
 export const readConfig = (path: string): Config => {
     const file = readFileSync(path, 'utf8')
     config = assignConfig(YAML.parse(file))
-    console.log(config)
+    console.log('-- Run with config --')
+    console.dir(config)
+    console.log('---------------------')
     return config
 }
 

@@ -1,7 +1,5 @@
-import dayjs from 'dayjs'
-import { Event } from '../k8s'
-import { formatDateTime } from '../util/datetime'
 import { CachedEvent } from './cache'
+import { formatDateTime, fromNow } from '../util/datetime'
 
 export type Message = {
     text: string
@@ -29,17 +27,18 @@ export const buildMessage = (
     }\``
 
     const eventMessages = cachedEvent.events.map(
-        ({ message }) => `>*${message}*`
+        ({ message, lastTimestamp }) =>
+            `>*${message}* (${fromNow(lastTimestamp)})`
     )
 
     const blocks = [
         buildingBlock.section(text),
-        buildingBlock.section(eventMessages.join('\n') ?? ''),
         buildingBlock.context(
-            `${formatDateTime(new Date())} | namespace: \`${
+            `${formatDateTime(new Date())} | stage: *${stage}* | namespace: *${
                 cachedEvent.namespace
-            }\` | stage: \`${stage}\``
+            }*`
         ),
+        buildingBlock.section(eventMessages.join('\n') ?? ''),
     ]
 
     return { text, blocks }

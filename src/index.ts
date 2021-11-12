@@ -1,26 +1,27 @@
+import { isAfter } from './util/datetime'
+import { Event, fetchEvents } from './k8s'
 import { getConfig, readConfig } from './util/config'
-import { Event, Kind, Reason, fetchEvents } from './k8s'
 import { enqueMessage, sendQueuedMessages } from './slack'
 
-const relevantKinds = [Kind.Pod, Kind.Node]
-const relevantReasons = [
-    Reason.Started,
-    Reason.Killing,
-    Reason.Failed,
-    Reason.SystemOOM,
-]
+// remember cli started to filter for past dates
+const startedAt = new Date()
+
+const includes = <T>(items: T[], item: T) => item && items.includes(item)
+
+const filterEvents = (events: Event[]): Event[] => {
+    const { k8sEvents, processPastEvents } = getConfig()
+    return events
+        .filter(
+            ({ lastTimestamp }) =>
+                processPastEvents || isAfter(lastTimestamp, startedAt)
+        )
+        .filter(({ namespace }) => includes(k8sEvents.namespaces, namespace))
+        .filter(({ kind }) => includes(k8sEvents.kinds, kind))
+        .filter(({ reason }) => includes(k8sEvents.reasons, reason))
+}
 
 const processEvents = (events: Event[]) => {
-    const { k8sEvents } = getConfig()
-    events
-        .filter(
-            ({ namespace }) =>
-                namespace && k8sEvents.namespaces.includes(namespace)
-        )
-        .filter(({ kind }) => kind && relevantKinds.includes(kind))
-        .filter(({ reason }) => reason && relevantReasons.includes(reason))
-        .forEach((item) => enqueMessage(item))
-
+    filterEvents(events).forEach((event) => enqueMessage(event))
     sendQueuedMessages()
 }
 

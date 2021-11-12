@@ -1,10 +1,21 @@
 stage: local
-fetchInterval: 30000
+fetchInterval: 10000
+processPastEvents: false
 k8sEvents:
     namespaces:
         - 'traefik'
+        - 'businesspartner'
+        - 'pricefeed'
+    reasons:
+        - Started
+        - Killing
+        - Failed
+        - SystemOOM
+    kinds:
+        - Pod
+        - Node
 slack:
-    enabled: false
+    enabled: true
     defaultChannel: C02J715D9MF
     events:
         - namespace: traefik
