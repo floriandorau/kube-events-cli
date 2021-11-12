@@ -49,10 +49,10 @@ export const sendQueuedMessages = async () => {
         if (cachedEvent.processed === false) {
             const channel = determineEventChannel(cachedEvent, slackConfig)
             if (channel) {
-                const message = buildMessage(cachedEvent, stage) ?? ''
+                const { text, blocks } = buildMessage(cachedEvent, stage) ?? ''
 
                 web.chat
-                    .postMessage({ blocks: message, channel })
+                    .postMessage({ text, blocks: blocks as any[], channel })
                     .then((result) => {
                         console.log(
                             `Successfully send message ${result.ts} in conversation ${channel}`
@@ -63,6 +63,9 @@ export const sendQueuedMessages = async () => {
                             processed: true,
                             ts: result.ts,
                         })
+                    })
+                    .catch((err) => {
+                        console.log('Error while posting message', err)
                     })
             }
         } else {
