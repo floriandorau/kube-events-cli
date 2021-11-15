@@ -1,11 +1,8 @@
 stage: local
 fetchInterval: 10000
-processPastEvents: false
+processPastEvents: true
 k8sEvents:
-    namespaces:
-        - 'traefik'
-        - 'businesspartner'
-        - 'pricefeed'
+    namespaces: [] # no filter
     reasons:
         - Started
         - Killing
@@ -18,5 +15,8 @@ slack:
     enabled: true
     defaultChannel: C02J715D9MF
     events:
-        - namespace: traefik
-          channel: C02J715D9MF
+        - channel: C02MBM429C3
+          namespaces:
+              - 'salestrading'
+              - 'businesspartner'
+              - 'enmacc'

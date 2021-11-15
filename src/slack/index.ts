@@ -1,7 +1,8 @@
 import { WebClient } from '@slack/web-api'
 
-import { Event, Kind } from '../k8s'
 import * as cache from './cache'
+import { includes } from '../util'
+import { Event, Kind } from '../k8s'
 import { buildMessage } from './builder'
 import { getConfig, throwConfigError, SlackConfig } from '../util/config'
 
@@ -9,12 +10,17 @@ const web = new WebClient(
     process.env.SLACK_TOKEN || throwConfigError('SLACK_TOKEN')
 )
 
+const getDefaultChannel = ({ defaultChannel }: SlackConfig) =>
+    defaultChannel ? [defaultChannel] : []
+
 const determineEventChannel = (
     cachedEvent: cache.CachedEvent,
-    { defaultChannel, events }: SlackConfig
-) => {
-    const slackEvent = events.find((e) => e.namespace === cachedEvent.namespace)
-    return slackEvent?.channel ?? defaultChannel
+    config: SlackConfig
+): string[] => {
+    const channels = config.events
+        .filter((e) => includes(e.namespaces, cachedEvent.namespace))
+        .map((e) => e.channel)
+    return channels.length > 0 ? channels : getDefaultChannel(config)
 }
 
 export const enqueMessage = (event: Event) => {
@@ -33,6 +39,22 @@ export const enqueMessage = (event: Event) => {
 }
 
 export const sendQueuedMessages = async () => {
+    if (cache.size() === 0) {
+        console.log('no messages to send')
+        return
+    }
+
+    cache.forEach(async (key, cachedEvent) => {
+        if (cachedEvent.processed) {
+            console.log(`${cachedEvent.name} already processed`)
+            return
+        }
+
+        sendCachedEvent(key, cachedEvent)
+    })
+}
+
+const sendCachedEvent = (key: string, cachedEvent: cache.CachedEvent) => {
     const { stage, slack: slackConfig } = getConfig()
 
     if (!slackConfig.enabled) {
@@ -40,36 +62,25 @@ export const sendQueuedMessages = async () => {
         return
     }
 
-    if (cache.size() === 0) {
-        console.log('no messages to send')
-        return
-    }
+    const channels = determineEventChannel(cachedEvent, slackConfig)
+    channels.forEach((channel) => {
+        const { text, blocks } = buildMessage(cachedEvent, stage) ?? ''
 
-    cache.forEach(async (key, cachedEvent) => {
-        if (cachedEvent.processed === false) {
-            const channel = determineEventChannel(cachedEvent, slackConfig)
-            if (channel) {
-                const { text, blocks } = buildMessage(cachedEvent, stage) ?? ''
+        web.chat
+            .postMessage({ text, blocks: blocks as any[], channel })
+            .then((result) => {
+                console.log(
+                    `Successfully send message ${result.ts} in conversation ${channel}`
+                )
 
-                web.chat
-                    .postMessage({ text, blocks: blocks as any[], channel })
-                    .then((result) => {
-                        console.log(
-                            `Successfully send message ${result.ts} in conversation ${channel}`
-                        )
-
-                        cache.set(key, {
-                            ...cachedEvent,
-                            processed: true,
-                            ts: result.ts,
-                        })
-                    })
-                    .catch((err) => {
-                        console.log('Error while posting message', err)
-                    })
-            }
-        } else {
-            console.log(`${cachedEvent.name} already processed`)
-        }
+                cache.set(key, {
+                    ...cachedEvent,
+                    processed: true,
+                    ts: result.ts,
+                })
+            })
+            .catch((err) => {
+                console.log('Error while posting message', err)
+            })
     })
 }

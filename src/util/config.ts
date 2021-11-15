@@ -14,7 +14,7 @@ export type SlackConfig = {
     events: SlackEvent[]
 }
 
-export type SlackEvent = { namespace: string; channel: string }
+export type SlackEvent = { channel: string; namespaces: string[] }
 
 export type Config = {
     stage: string

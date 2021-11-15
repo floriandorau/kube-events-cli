@@ -2,11 +2,10 @@ import { isAfter } from './util/datetime'
 import { Event, fetchEvents } from './k8s'
 import { getConfig, readConfig } from './util/config'
 import { enqueMessage, sendQueuedMessages } from './slack'
+import { includes } from './util'
 
 // remember cli started to filter for past dates
 const startedAt = new Date()
-
-const includes = <T>(items: T[], item: T) => item && items.includes(item)
 
 const filterEvents = (events: Event[]): Event[] => {
     const { k8sEvents, processPastEvents } = getConfig()
@@ -15,9 +14,20 @@ const filterEvents = (events: Event[]): Event[] => {
             ({ lastTimestamp }) =>
                 processPastEvents || isAfter(lastTimestamp, startedAt)
         )
-        .filter(({ namespace }) => includes(k8sEvents.namespaces, namespace))
-        .filter(({ kind }) => includes(k8sEvents.kinds, kind))
-        .filter(({ reason }) => includes(k8sEvents.reasons, reason))
+        .filter(
+            ({ namespace }) =>
+                k8sEvents.namespaces.length === 0 ||
+                includes(k8sEvents.namespaces, namespace)
+        )
+        .filter(
+            ({ kind }) =>
+                k8sEvents.kinds.length === 0 || includes(k8sEvents.kinds, kind)
+        )
+        .filter(
+            ({ reason }) =>
+                k8sEvents.reasons.length === 0 ||
+                includes(k8sEvents.reasons, reason)
+        )
 }
 
 const processEvents = (events: Event[]) => {
