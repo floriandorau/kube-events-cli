@@ -23,7 +23,7 @@
     "dependencies": {
         "@kubernetes/client-node": "^0.15.1",
         "@slack/web-api": "^6.4.0",
-        "dayjs": "^1.10.7",
+        "dayjs": "^1.11.7",
         "dotenv": "^10.0.0",
         "node-cache": "^5.1.2",
         "yaml": "^1.10.2",
