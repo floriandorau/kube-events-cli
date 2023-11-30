@@ -21,7 +21,7 @@
         "typescript": "^4.4.4"
     },
     "dependencies": {
-        "@kubernetes/client-node": "^0.15.1",
+        "@kubernetes/client-node": "^0.19.0",
         "@slack/web-api": "^6.4.0",
         "dayjs": "^1.10.7",
         "dotenv": "^10.0.0",
