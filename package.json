@@ -14,15 +14,15 @@
     "devDependencies": {
         "@types/node": "^14.17.20",
         "@types/yargs": "^17.0.3",
-        "@typescript-eslint/eslint-plugin": "^5.1.0",
-        "@typescript-eslint/parser": "^5.1.0",
-        "eslint": "^8.0.1",
-        "nodemon": "^2.0.13",
+        "@typescript-eslint/eslint-plugin": "^6.1.0",
+        "@typescript-eslint/parser": "^8.3.0",
+        "eslint": "^8.44.0",
+        "nodemon": "^3.0.0",
         "typescript": "^4.4.4"
     },
     "dependencies": {
-        "@kubernetes/client-node": "^0.15.1",
-        "@slack/web-api": "^6.4.0",
+        "@kubernetes/client-node": "^0.21.0",
+        "@slack/web-api": "^6.12.1",
         "dayjs": "^1.10.7",
         "dotenv": "^10.0.0",
         "node-cache": "^5.1.2",
