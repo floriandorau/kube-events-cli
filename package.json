@@ -16,12 +16,12 @@
         "@types/yargs": "^17.0.3",
         "@typescript-eslint/eslint-plugin": "^5.1.0",
         "@typescript-eslint/parser": "^5.1.0",
-        "eslint": "^8.0.1",
+        "eslint": "^9.26.0",
         "nodemon": "^2.0.13",
         "typescript": "^4.4.4"
     },
     "dependencies": {
-        "@kubernetes/client-node": "^0.15.1",
+        "@kubernetes/client-node": "^0.21.0",
         "@slack/web-api": "^6.4.0",
         "dayjs": "^1.10.7",
         "dotenv": "^10.0.0",
